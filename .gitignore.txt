@@ -1,0 +1,16 @@
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Data (keep raw & processed data out of GitHub)
+data/raw/*
+data/processed/*
+
+# Model artifacts
+model/*.rds
+model/*.csv
+
+# OS
+.DS_Store
+Thumbs.db
