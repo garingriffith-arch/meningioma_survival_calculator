@@ -1,10 +1,6 @@
 # R/04_data_dictionary.R
 # Step 4: quick-and-dirty empirical data dictionary (baseline + outcome vars)
-#
-# Goal: for a curated set of variables, spit out:
-#   - missingness
-#   - basic numeric summaries OR quick categorical overview
-# Then save a CSV so I can eyeball what I'm working with.
+
 
 library(dplyr)
 
@@ -143,3 +139,4 @@ out_path <- "data/processed/data_dictionary.csv"
 write.csv(dictionary, out_path, row.names = FALSE)
 
 cat("\nData dictionary saved to:", out_path, "\n")
+
