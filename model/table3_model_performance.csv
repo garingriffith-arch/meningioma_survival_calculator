@@ -1,0 +1,4 @@
+"Metric","value"
+"Apparent Harrell C-index",0.780423517652149
+"Optimism-corrected C-index (bootstrap)",0.7793700203493
+"Bootstrap optimism",0.00105349730284859
