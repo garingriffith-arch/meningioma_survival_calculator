@@ -1,1 +1,47 @@
-# predictivecalculator
+# Grade II–III Intracranial Meningioma Survival Estimator
+
+This repository contains the code used to develop and internally validate a diagnosis-time survival prediction model for patients with WHO grade II–III intracranial meningioma using National Cancer Database (NCDB) data, along with a Shiny-based clinical survival estimator.
+
+## Overview
+
+- **Study type:** Retrospective population-based cohort study  
+- **Data source:** National Cancer Database (NCDB)  
+- **Population:** Adults with WHO grade II–III intracranial meningioma  
+- **Outcome:** Overall survival  
+- **Model:** Multivariable Cox proportional hazards regression  
+- **Validation:** Bootstrap internal validation with optimism correction  
+- **Time horizons:** 1-, 3-, and 5-year overall survival  
+
+The model is intentionally parsimonious and restricted to variables available at the time of diagnosis to maximize stability, interpretability, and clinical usability.
+
+## Predictors Included
+
+- Age  
+- Sex  
+- WHO grade (II vs III)  
+- Charlson–Deyo comorbidity score  
+- Tumor size category (≤3 cm, 3–6 cm, >6 cm, unknown)  
+- Race (White, Black, Other/Unknown)  
+- Year of diagnosis (included as an adjustment for secular trends)
+
+## Model Performance
+
+- **Harrell C-index:** ~0.78  
+- **Bootstrap optimism:** ~0.001  
+- **Optimism-corrected C-index:** ~0.779  
+- Good calibration at 1, 3, and 5 years
+
+## Shiny Survival Estimator
+
+A clinician-facing Shiny application is included to demonstrate model use.  
+The app estimates 1-, 3-, and 5-year overall survival probabilities and displays a predicted survival curve for representative patients.
+
+**Important:**  
+This tool provides population-level estimates intended to support clinical discussion and shared decision-making. It is not a substitute for individualized clinical judgment.
+
+### Run the Shiny app locally
+
+From the project root in R:
+
+```r
+shiny::runApp("shiny")
