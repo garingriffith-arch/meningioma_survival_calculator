@@ -7,12 +7,14 @@ library(survival)
 library(dplyr)
 library(bslib)
 
-# Load frozen model (Shiny runs from /shiny)
+# ------------------------------------------------------------
+# load frozen model (built in 05)
+# ------------------------------------------------------------
 fit <- readRDS("../model/cox_simple_fit.rds")
 
-# ----------------------------
+# ------------------------------------------------------------
 # UI
-# ----------------------------
+# ------------------------------------------------------------
 ui <- fluidPage(
   theme = bs_theme(
     version = 5,
@@ -20,17 +22,16 @@ ui <- fluidPage(
     base_font = font_google("Roboto"),
     heading_font = font_google("Roboto")
   ),
-  
-  # ---- Header ----
-  # ---- Header ----
+
+  # header strip (logo + title)
   fluidRow(
     style = "
-    background-color: #f8f9fa;
-    padding: 20px 15px;
-    border-bottom: 1px solid #ddd;
-    align-items: center;
-    display: flex;
-  ",
+      background-color: #f8f9fa;
+      padding: 20px 15px;
+      border-bottom: 1px solid #ddd;
+      align-items: center;
+      display: flex;
+    ",
     column(
       width = 3,
       img(
@@ -53,39 +54,39 @@ ui <- fluidPage(
       )
     )
   ),
-  
+
   div(style = "height: 10px;"),
-  
+
   sidebarLayout(
     sidebarPanel(
       width = 3,
-      
+
       h4("Patient Characteristics"),
-      
+
       numericInput("age", "Age (years)", value = 55, min = 18, max = 90),
-      
+
       selectInput("sex", "Sex", choices = c("Male", "Female")),
-      
+
       selectInput("grade", "WHO Grade", choices = c("II", "III")),
-      
+
       numericInput(
         "cdcc",
         "Charlson–Deyo comorbidity score",
         value = 0, min = 0, max = 3
       ),
-      
+
       selectInput(
         "size",
         "Tumor size category",
         choices = c("<=3cm", "3–6cm", ">6cm", "Unknown")
       ),
-      
+
       selectInput(
         "race",
         "Race",
         choices = c("White", "Black", "Other/Unknown")
       ),
-      
+
       actionButton(
         "calc",
         "Estimate Survival",
@@ -93,33 +94,21 @@ ui <- fluidPage(
         style = "width: 100%; margin-top: 15px;"
       )
     ),
-    
+
     mainPanel(
       width = 9,
-      
+
       h4("Estimated Overall Survival"),
-      
+
       fluidRow(
-        column(
-          width = 4,
-          div(style = "font-size: 22px; font-weight: bold;",
-              textOutput("s1"))
-        ),
-        column(
-          width = 4,
-          div(style = "font-size: 22px; font-weight: bold;",
-              textOutput("s3"))
-        ),
-        column(
-          width = 4,
-          div(style = "font-size: 22px; font-weight: bold;",
-              textOutput("s5"))
-        )
+        column(4, div(style = "font-size: 22px; font-weight: bold;", textOutput("s1"))),
+        column(4, div(style = "font-size: 22px; font-weight: bold;", textOutput("s3"))),
+        column(4, div(style = "font-size: 22px; font-weight: bold;", textOutput("s5")))
       ),
-      
+
       br(),
       plotOutput("survplot", height = "420px"),
-      
+
       br(),
       wellPanel(
         p(
@@ -134,58 +123,65 @@ ui <- fluidPage(
   )
 )
 
-# ----------------------------
+# ------------------------------------------------------------
 # Server
-# ----------------------------
+# ------------------------------------------------------------
 server <- function(input, output, session) {
-  
-  newdata <- eventReactive(input$calc, {
-    data.frame(
+
+  # fixed model-era assumption (remove from UI; keep consistent)
+  YEAR_FIXED <- 2017
+
+  # notes-to-self: stable single-time survival extraction
+  surv_at <- function(sf, t_months) {
+    s <- summary(sf, times = t_months)
+    if (length(s$surv) == 0) return(NA_real_)
+    as.numeric(s$surv)
+  }
+
+  # one click => build newdata + run survfit once + cache outputs
+  res <- eventReactive(input$calc, {
+
+    nd <- data.frame(
       AGE = as.numeric(input$age),
       SEX = factor(input$sex, levels = c("Male", "Female")),
       GRADE = factor(input$grade, levels = c("II", "III")),
       CDCC_TOTAL_BEST = as.numeric(input$cdcc),
-      TUMOR_SIZE_CAT = factor(
-        input$size,
-        levels = c("<=3cm", "3–6cm", ">6cm", "Unknown")
-      ),
-      RACE_CAT = factor(
-        input$race,
-        levels = c("White", "Black", "Other/Unknown")
-      ),
-      YEAR_OF_DIAGNOSIS = 2017
+      TUMOR_SIZE_CAT = factor(input$size, levels = c("<=3cm", "3–6cm", ">6cm", "Unknown")),
+      RACE_CAT = factor(input$race, levels = c("White", "Black", "Other/Unknown")),
+      YEAR_OF_DIAGNOSIS = YEAR_FIXED
     )
-  })
-  
-  get_surv <- function(sf, t) {
-    idx <- max(which(sf$time <= t))
-    if (length(idx) == 0) NA_real_ else sf$surv[idx]
-  }
-  
+
+    sf <- survfit(fit, newdata = nd)
+
+    list(
+      nd = nd,
+      sf = sf,
+      s12 = surv_at(sf, 12),
+      s36 = surv_at(sf, 36),
+      s60 = surv_at(sf, 60)
+    )
+  }, ignoreInit = TRUE)
+
   output$s1 <- renderText({
-    nd <- newdata()
-    sf <- survfit(fit, newdata = nd)
-    sprintf("1-year OS: %.1f%%", 100 * get_surv(sf, 12))
+    r <- res(); req(r)
+    sprintf("1-year OS: %.1f%%", 100 * r$s12)
   })
-  
+
   output$s3 <- renderText({
-    nd <- newdata()
-    sf <- survfit(fit, newdata = nd)
-    sprintf("3-year OS: %.1f%%", 100 * get_surv(sf, 36))
+    r <- res(); req(r)
+    sprintf("3-year OS: %.1f%%", 100 * r$s36)
   })
-  
+
   output$s5 <- renderText({
-    nd <- newdata()
-    sf <- survfit(fit, newdata = nd)
-    sprintf("5-year OS: %.1f%%", 100 * get_surv(sf, 60))
+    r <- res(); req(r)
+    sprintf("5-year OS: %.1f%%", 100 * r$s60)
   })
-  
+
   output$survplot <- renderPlot({
-    nd <- newdata()
-    sf <- survfit(fit, newdata = nd)
-    
+    r <- res(); req(r)
+
     plot(
-      sf,
+      r$sf,
       xlab = "Months since diagnosis",
       ylab = "Overall survival probability",
       lwd = 3,
