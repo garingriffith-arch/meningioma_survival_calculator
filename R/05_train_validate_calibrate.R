@@ -1,8 +1,5 @@
 # R/05_train_validate_calibrate.R
 # SIMPLE, STABLE Cox model for Grade II–III intracranial meningioma
-# notes-to-self:
-#   - keep this boring on purpose (no rms, no splines, no fancy factor traps)
-#   - goal is a solid baseline: train/test split + c-index + basic survival preds
 
 library(dplyr)
 library(survival)
@@ -145,3 +142,4 @@ pred_df <- bind_cols(
 write.csv(pred_df, "model/test_predictions_simple.csv", row.names = FALSE)
 
 cat("Saved model + test predictions to model/.\n")
+
