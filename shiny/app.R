@@ -46,9 +46,14 @@ ui <- fluidPage(
           "Grade II–III Intracranial Meningioma Survival Estimator",
           style = "margin-bottom: 5px;"
         ),
+        
         h5(
           "Oregon Health & Science University",
           style = "color: #555; margin-top: 0;"
+        ),
+        h6(
+          "Department of Neurological Surgery",
+          style = "color: #666; margin-top: 2px;"
         )
       )
     )
@@ -126,7 +131,7 @@ ui <- fluidPage(
           strong("Intended use: "),
           "This tool estimates overall survival based on population-level registry data ",
           "and is intended to support clinical discussion. Predictions assume contemporary ",
-          "management approximated by the most recent era available in the dataset and are ",
+          "management approximated by the most recent era available in the dataset (2017) and are ",
           "not a substitute for individualized clinical judgment."
         )
       )
