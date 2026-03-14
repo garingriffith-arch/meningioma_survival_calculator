@@ -1,16 +1,54 @@
-# R
+# R session files
 .Rhistory
+.Rapp.history
 .RData
-.Rproj.user/
+.Ruserdata
 
-# Data (keep raw & processed data out of GitHub)
+# RStudio
+.Rproj.user/
+*.Rproj.user
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Logs
+*.log
+
+# Raw and processed data
 data/raw/*
 data/processed/*
 
-# Model artifacts
-model/*.rds
-model/*.csv
+# Keep folder structure
+!data/raw/.gitkeep
+!data/processed/.gitkeep
 
-# OS
-.DS_Store
-Thumbs.db
+# Manuscript outputs
+tables/manuscript/*
+figures/manuscript/*
+
+# Keep folder structure
+!tables/manuscript/.gitkeep
+!figures/manuscript/.gitkeep
+
+# Shiny deployment files
+app/rsconnect/
+rsconnect/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# Rendered outputs
+*_files/
+*.html
+*.pdf
