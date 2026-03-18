@@ -434,9 +434,8 @@ server <- function(input, output, session) {
       surv = s_main$surv
     )
     
-    ann_df <- data.frame(
-      time = c(12, 36, 60),
-      label = c("1-year", "3-year", "5-year")
+    guide_df <- data.frame(
+      time = c(12, 36, 60)
     )
     
     p <- ggplot(df, aes(x = time, y = surv)) +
@@ -450,7 +449,7 @@ server <- function(input, output, session) {
         }
       } +
       geom_vline(
-        data = ann_df,
+        data = guide_df,
         aes(xintercept = time),
         linetype = "dashed",
         linewidth = 0.55,
@@ -468,16 +467,6 @@ server <- function(input, output, session) {
         color = "#1f6feb",
         size = 3.2
       ) +
-      annotate(
-        "text",
-        x = c(12, 36, 58.5),
-        y = c(1.015, 1.015, 1.015),
-        label = c("1-year", "3-year", "5-year"),
-        size = 3.8,
-        fontface = "bold",
-        color = "#5b6b7f",
-        vjust = 0
-      ) +
       scale_x_continuous(
         limits = c(0, 60.8),
         breaks = seq(0, 60, by = 12),
@@ -493,7 +482,6 @@ server <- function(input, output, session) {
         x = "Months",
         y = "Overall survival"
       ) +
-      coord_cartesian(clip = "off") +
       theme_minimal(base_size = 14) +
       theme(
         panel.grid.minor = element_blank(),
@@ -502,7 +490,7 @@ server <- function(input, output, session) {
         axis.text = element_text(color = "#425466"),
         plot.background = element_rect(fill = "#ffffff", color = NA),
         panel.background = element_rect(fill = "#ffffff", color = NA),
-        plot.margin = margin(18, 30, 10, 10)
+        plot.margin = margin(12, 12, 10, 10)
       )
     
     p
