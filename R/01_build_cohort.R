@@ -3,6 +3,7 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(readr)
   library(tibble)
+  library(tidyr)
 })
 
 cfg <- source("R/config.R")$value
@@ -73,7 +74,7 @@ df <- raw_df |>
   dplyr::filter(grade_chr %in% cfg$grade_keep) |>
   add_flow("Grade II-III") |>
   dplyr::filter(age >= 18) |>
-  add_flow("Age >= 18 years") |>
+  add_flow("Age >=18 years") |>
   dplyr::filter(
     !is.na(tumor_size_mm),
     tumor_size_mm > 0,
