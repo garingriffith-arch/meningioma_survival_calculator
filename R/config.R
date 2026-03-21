@@ -18,6 +18,17 @@ cfg <- list(
   
   horizons_months = c(12, 36, 60),
   
+  age_spline_df   = 4,
+  size_spline_df  = 3,
+  
+  age_ref_years   = 60,
+  size_ref_mm     = 30,
+  
+  bootstrap_B = 300,
+  bootstrap_seed = 1,
+  
+  calibration_groups = 10,
+  
   processed_dir = file.path("data", "processed"),
   tables_dir    = "tables",
   figures_dir   = "figures"
