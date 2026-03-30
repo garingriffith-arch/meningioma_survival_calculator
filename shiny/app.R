@@ -24,6 +24,8 @@ surv_at <- function(sf, t) {
   as.numeric(s[1])
 }
 
+model_n <- fit$n
+
 # Median + CI extraction from survfit (months), with safe fallback
 median_stats <- function(sf) {
   out <- list(med = NA_real_, lower = NA_real_, upper = NA_real_)
@@ -360,6 +362,11 @@ ui <- page_fluid(
           card_body(
             p(
               class = "info-text",
+              span("Model cohort: ", class = "info-label"),
+              paste0("n = ", format(model_n, big.mark = ","), " patients")
+            ),
+            p(
+              class = "info-text",
               span("Intended use: ", class = "info-label"),
               "This tool provides population-level survival estimates derived from the National Cancer Database. It is intended to support clinician-patient discussion and does not replace individualized clinical judgment."
             )
@@ -471,7 +478,7 @@ server <- function(input, output, session) {
       df$upper <- NA_real_
     }
     
-    df <- df[df$time <= 60, , drop = FALSE]
+    df <- df[df$time <= 120, , drop = FALSE]
     
     if (nrow(df) == 0) {
       df <- data.frame(
@@ -487,7 +494,7 @@ server <- function(input, output, session) {
       )
     }
     
-    pts <- c(12, 36, 60)
+    pts <- c(12, 36, 60, 120)
     s_main <- summary(sf, times = pts, extend = TRUE)
     
     pts_df <- data.frame(
@@ -496,7 +503,7 @@ server <- function(input, output, session) {
     )
     
     guide_df <- data.frame(
-      time = c(12, 36, 60)
+      time = c(12, 36, 60, 120)
     )
     
     p <- ggplot(df, aes(x = time, y = surv)) +
@@ -529,8 +536,8 @@ server <- function(input, output, session) {
         size = 3.2
       ) +
       scale_x_continuous(
-        limits = c(0, 60.8),
-        breaks = seq(0, 60, by = 12),
+        limits = c(0, 120.8),
+        breaks = seq(0, 120, by = 12),
         expand = expansion(mult = c(0.01, 0.02))
       ) +
       scale_y_continuous(
