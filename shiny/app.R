@@ -24,6 +24,31 @@ surv_at <- function(sf, t) {
   as.numeric(s[1])
 }
 
+# Median + CI extraction from survfit (months), with safe fallback
+median_stats <- function(sf) {
+  out <- list(med = NA_real_, lower = NA_real_, upper = NA_real_)
+  
+  q <- tryCatch(
+    quantile(sf, probs = 0.5, conf.int = TRUE),
+    error = function(e) NULL
+  )
+  
+  if (!is.null(q)) {
+    out$med <- suppressWarnings(as.numeric(q$quantile[1]))
+    if (!is.null(q$lower)) out$lower <- suppressWarnings(as.numeric(q$lower[1]))
+    if (!is.null(q$upper)) out$upper <- suppressWarnings(as.numeric(q$upper[1]))
+    return(out)
+  }
+  
+  # Fallback: first time S(t) <= 0.5 (median not necessarily CI)
+  if (!is.null(sf$time) && !is.null(sf$surv) && length(sf$time) > 0) {
+    idx <- which(sf$surv <= 0.5)[1]
+    if (!is.na(idx)) out$med <- as.numeric(sf$time[idx])
+  }
+  
+  out
+}
+
 ui <- page_fluid(
   theme = bs_theme(
     version = 5,
@@ -276,7 +301,7 @@ ui <- page_fluid(
       
       div(
         layout_columns(
-          col_widths = c(4, 4, 4),
+          col_widths = c(3, 3, 3, 3),
           
           card(
             class = "metric-card",
@@ -299,6 +324,21 @@ ui <- page_fluid(
             card_body(
               div(textOutput("s5"), class = "metric-value"),
               div("5-year overall survival", class = "metric-label")
+            )
+          ),
+          
+          # Median card: big value is "X ± Y months"; subtext only "Median predicted survival" with tooltip
+          card(
+            class = "metric-card",
+            card_body(
+              div(textOutput("med"), class = "metric-value"),
+              div(
+                tags$span(
+                  "Median predicted survival",
+                  class = "metric-label",
+                  title = "‘Not reached’ means the predicted survival curve does not fall below 50% within available follow-up, so the median time cannot be estimated."
+                )
+              )
             )
           )
         ),
@@ -391,6 +431,27 @@ server <- function(input, output, session) {
   output$s5 <- renderText({
     req(surv_obj())
     sprintf("%.1f%%", 100 * surv_at(surv_obj(), 60))
+  })
+  
+  # Big text: "X ± Y months" (or "Not reached" if not estimable)
+  output$med <- renderText({
+    req(surv_obj())
+    ms <- median_stats(surv_obj())
+    
+    # If median not estimable
+    if (!is.finite(ms$med)) return("Not reached")
+    
+    # Prefer ± half-width of 95% CI when available
+    if (is.finite(ms$lower) && is.finite(ms$upper)) {
+      pm <- as.integer(round((ms$upper - ms$lower) / 2))
+      med_round <- as.integer(round(ms$med))
+      if (is.finite(pm) && pm > 0) {
+        return(sprintf("%d \u00B1 %d months", med_round, pm))
+      }
+    }
+    
+    # Fallback: median only
+    sprintf("%d months", as.integer(round(ms$med)))
   })
   
   output$survplot <- renderPlot({
