@@ -163,27 +163,20 @@ ui <- page_fluid(
           class = "input-card",
           card_body(
             h2("Patient characteristics", class = "section-title"),
-
             numericInput("age", "Age (years)", value = 55, min = 18, max = 90, step = 1),
-
             selectInput("sex", "Sex", choices = sex_levels, selected = sex_levels[1], selectize = FALSE),
             selectInput("race", "Race", choices = race_levels, selected = race_levels[1], selectize = FALSE),
             selectInput("ethnicity", "Ethnicity", choices = eth_levels, selected = eth_levels[1], selectize = FALSE),
-
-            numericInput("tsize_mm", "Tumor size (mm)", value = 45, min = 1, max = 150, step = 1),
-
+            selectInput("insurance", "Insurance", choices = ins_choices, selected = insurance_levels[1], selectize = FALSE),
+            selectInput("income", "Neighborhood income group", choices = inc_choices, selected = income_levels[1], selectize = FALSE),
+            selectInput("cdcc", "Charlson-Deyo score", choices = 0:3, selected = 0, selectize = FALSE),
             selectInput(
               "grade", "WHO grade",
               choices = c("Grade II" = "2", "Grade III" = "3"),
               selected = "2",
               selectize = FALSE
             ),
-
-            selectInput("cdcc", "Charlson-Deyo score", choices = 0:3, selected = 0, selectize = FALSE),
-
-            selectInput("insurance", "Insurance", choices = ins_choices, selected = insurance_levels[1], selectize = FALSE),
-            selectInput("income", "Neighborhood income group", choices = inc_choices, selected = income_levels[1], selectize = FALSE),
-
+            numericInput("tsize_mm", "Tumor size (mm)", value = 45, min = 1, max = 150, step = 1),
             actionButton("calc", "Estimate survival", class = "btn-primary w-100"),
             checkboxInput("show_ci", "Show confidence bands", value = FALSE)
           )
